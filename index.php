@@ -40,6 +40,38 @@ $hotels = [
 ];
 
 
+$parking_filter = $_GET['parking'] ?? '';
+
+$rating_filter = $_GET['rating'] ?? '';
+
+
+$filtered_hotels = [];
+
+
+
+if ($parking_filter && $rating_filter) {
+    foreach ($hotels as $hotel) {
+        if ($hotel['parking'] && $hotel['vote'] >= $rating_filter) {
+            $filtered_hotels[] = $hotel;
+        }
+    }
+} elseif ($parking_filter && !$rating_filter) {
+    foreach ($hotels as $hotel) {
+        if ($hotel['parking']) {
+            $filtered_hotels[] = $hotel;
+        }
+    }
+} elseif ($rating_filter && !$parking_filter) {
+    foreach ($hotels as $hotel) {
+        if ($hotel['vote'] >= $rating_filter) {
+            $filtered_hotels[] = $hotel;
+        }
+    }
+} else {
+    $filtered_hotels = $hotels;
+}
+
+
 ?>
 
 
@@ -63,7 +95,23 @@ $hotels = [
 
 <body>
     <div class="container py-5 text-center">
-        <h1>Hotel</h1>
+        <h1 class="mb-3">Hotel</h1>
+        <form action="index.php" method="GET" class="d-flex align-items-center justify-content-center">
+            <div class="d-flex aling-items-center me-3">
+                <input type="checkbox" name="parking" id="parking" class="me-2" <?= ($parking_filter) ? 'checked' : '' ?>>
+                <label for="checkbox">Con parcheggio</label>
+            </div>
+            <div class="d-flex aling-items-center me-3">
+                <label for="rating" class="me-2">Voto:</label>
+                <select name="rating" id="rating">
+                    <option value="">---</option>
+                    <?php for ($i = 1; $i <= 5; $i++) : ?>
+                        <option value="<?= $i ?>" <?= $i === intval($rating_filter) ? 'selected' : '' ?>><?= $i ?></option>
+                    <?php endfor; ?>
+                </select>
+            </div>
+            <button class="btn btn-success">Cerca!</button>
+        </form>
         <hr class="mb-5">
         <table class="table">
             <thead>
@@ -76,16 +124,16 @@ $hotels = [
                 </tr>
             </thead>
             <tbody>
-                <?php foreach ($hotels as $hotel) : ?>
+                <?php foreach ($filtered_hotels as $hotel) : ?>
                     <tr>
                         <th><?= $hotel['name'] ?></th>
                         <th><?= $hotel['description'] ?></th>
                         <th><?= $hotel['parking'] ? '<i class="fa-solid fa-circle-check"></i>' : '<i class="fa-solid fa-circle-xmark"></i>' ?></th>
                         <th><?php for ($i = 0; $i < $hotel['vote']; $i++) : ?>
-                                <?= '<i class="fa-solid fa-star"></i>' ?>
+                                <i class="fa-solid fa-star"></i>
                             <?php endfor; ?>
                             <?php for ($i = 0; $i < 5 - $hotel['vote']; $i++) : ?>
-                                <?= '<i class="fa-regular fa-star"></i>' ?>
+                                <i class="fa-regular fa-star"></i>
                             <?php endfor; ?>
                         </th>
                         <th><?= $hotel['distance_to_center'] ?> Km</th>
